@@ -11,6 +11,13 @@ const int stopUnten = 3;
 const int HX711_dout = 7; //mcu > HX711 dout pin
 const int HX711_sck = 8; //mcu > HX711 sck pin
 
+
+// Steigung der Spindel
+const int steigung = 8
+
+// Schritte pro Umdrehung
+const int schritte = 200
+
 //HX711 constructor:
 HX711_ADC LoadCell(HX711_dout, HX711_sck);
 
@@ -65,7 +72,7 @@ void loop() {
     move(400, 0, 15);
   }
   if (x == 3) {
-    messung();
+    kraft_weg();
   }
   //Serial.println(digitalRead(stopUnten));
   //Serial.println(digitalRead(stopOben));
@@ -106,8 +113,8 @@ void turn_to_start() {
   }
 }
 
-void messung() {
-  int speed_t = 20;
+void kraft_weg() {
+  int speed_t = 12;
   int i = 0;
   static boolean newDataReady = 0;
   const int serialPrintInterval = 0;
@@ -145,4 +152,39 @@ void messung() {
     i++;
   }
   
+}
+
+void anfangszugkraft(int prueflaenge) {
+  int speed_t = 12;
+  int x = round(prueflaenge * schritte / steigung)
+
+  digitalWrite(dirPin, HIGH);
+  if (digitalRead(stopUnten) == 0) {
+    Serial.println("Schlitten befindet sich nicht in Nullposition!");
+    return;
+  }
+
+  Serial.println("Beginn der Messung Anfangszugkraft");
+  Serial.print("Prüflänge: ");
+  Serial.println(prueflaenge);
+  Serila.println("Schlitten wird auf Prüflänge bewegt");
+  move(x, 1, speed_t);
+  delay(1000);
+  Serial.println("Elastic wird auf vierfache Prüflänge gedehnt")
+  move(4*x, 1, speed_t);
+  Serial.println("Warte 5 sek");
+  delay(5000);
+  Serial.println("Entspanne den Elastic wieder auf dreifache Prüflänge");
+  move(x, 1, speed_t);
+  Serial.println("Warte 30 sek");
+  for (int i = 0; i < 30; i++) {
+    Serial.print("x");
+    delay(1000);
+  }
+  float i = LoadCell.getData();
+  Serial.print("Anfangszugkraft: ");
+  Serial.println(i);
+  
+  
+}
 }
