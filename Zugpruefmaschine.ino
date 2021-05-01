@@ -66,13 +66,16 @@ void loop() {
     turn_to_start();
   }
   if (x == 1) {
-    move(400, 1, 15);
+    move(1250, 1, 12);
   }
   if (x == 2) {
-    move(400, 0, 15);
+    move(400, 0, 12);
   }
   if (x == 3) {
-    kraft_weg();
+    kraft_weg(790, 1);
+  }
+  if (x == 4) {
+    anfangszugkraft(7.9);
   }
   //Serial.println(digitalRead(stopUnten));
   //Serial.println(digitalRead(stopOben));
@@ -103,7 +106,7 @@ void move(int step_t, int dir, int speed_t) {
 }
 
 void turn_to_start() {
-  int speed_t = 20;
+  int speed_t = 12;
   digitalWrite(dirPin, LOW);
   while (digitalRead(stopUnten) == 0) {
     digitalWrite(stpPin, HIGH);
@@ -111,35 +114,34 @@ void turn_to_start() {
     digitalWrite(stpPin, LOW);
     delay(speed_t);
   }
+  Serial.println("Schlitten befindet sich in Nullposition.");
 }
 
-void kraft_weg() {
+void kraft_weg(int schritte, int richtung) {
   int speed_t = 12;
   int i = 0;
   static boolean newDataReady = 0;
   const int serialPrintInterval = 0;
   
   digitalWrite(dirPin, HIGH);
-  if (digitalRead(stopUnten) == 0) {
-    Serial.println("Schlitten befindet sich nicht in Nullposition!");
-    return;
-  }
+  //if (digitalRead(stopUnten) == 0) {
+  //  Serial.println("Schlitten befindet sich nicht in Nullposition!");
+  //  return;
+  //}
 
-  while (digitalRead(stopOben) == 0) {
-    digitalWrite(stpPin, HIGH);
-    delay(speed_t);
-    digitalWrite(stpPin, LOW);
-    delay(speed_t);
+  while (i < schritte) {
+    //move(1, richtung, speed_t);
+    delay(1000);
 
     if (LoadCell.update()) newDataReady = true;
 
     if(newDataReady) {
       if (millis() > t + serialPrintInterval) {
-        float i = LoadCell.getData();
+        float kraft = LoadCell.getData();
         Serial.print("Load_cell output val: ");
-        Serial.println(i);
+        Serial.println(kraft);
 
-        if (i > force_max) {
+        if (kraft > force_max) {
           Serial.println("Maximal zulässige Zugkraft erreicht");
           break;
         }
@@ -148,15 +150,16 @@ void kraft_weg() {
         t = millis();
       }
     }
-    
     i++;
-  }
-  
+  } 
 }
 
-void anfangszugkraft(int prueflaenge) {
+void anfangszugkraft(float prueflaenge) {
   int speed_t = 12;
   int x = round(prueflaenge * schritte / steigung);
+
+  const int serialPrintInterval = 0;
+  static boolean newDataReady = 0;
 
   digitalWrite(dirPin, HIGH);
   if (digitalRead(stopUnten) == 0) {
@@ -168,21 +171,47 @@ void anfangszugkraft(int prueflaenge) {
   Serial.print("Prüflänge: ");
   Serial.println(prueflaenge);
   Serial.println("Schlitten wird auf Prüflänge bewegt");
-  move(x, 1, speed_t);
+  //move(x, 1, speed_t);
+  kraft_weg(x, 1);
   delay(1000);
   Serial.println("Elastic wird auf vierfache Prüflänge gedehnt");
-  move(4*x, 1, speed_t);
+  //move(3*x, 1, speed_t);
+  kraft_weg(3*x, 1);
   Serial.println("Warte 5 sek");
-  delay(5000);
-  Serial.println("Entspanne den Elastic wieder auf dreifache Prüflänge");
-  move(x, 1, speed_t);
-  Serial.println("Warte 30 sek");
-  for (int i = 0; i < 30; i++) {
+  for (int n = 0; n < 5; n++) {
     Serial.print("x");
     delay(1000);
   }
-  float i = LoadCell.getData();
+  Serial.println("Entspanne den Elastic wieder auf dreifache Prüflänge");
+  //move(x, 0, speed_t);
+  kraft_weg(x, 0);
+  Serial.println("Warte 30 sek");
+  for (int n = 0; n < 30; n++) {
+    Serial.print("x");
+    delay(1000);
+  }
+  Serial.println("");
+  Serial.println("Messung");
+  
+  float kraft = LoadCell.getData();
+  delay(1000);
   Serial.print("Anfangszugkraft: ");
-  Serial.println(i);
+  Serial.println(kraft);
+  
+//  if (LoadCell.update()) newDataReady = true;
+//  
+//  if(newDataReady) {
+//    if (millis() > t + serialPrintInterval) {
+//      float kraft = LoadCell.getData();
+//      Serial.print("Anfangszugkraft: ");
+//      Serial.println(kraft);
+//
+//      newDataReady = 0;
+//      t = millis();
+//    }
+//  }
+  
+  Serial.println("Fahre wieder in Nullposition");
+  turn_to_start();
   
 }
