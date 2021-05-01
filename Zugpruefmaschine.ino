@@ -13,10 +13,10 @@ const int HX711_sck = 8; //mcu > HX711 sck pin
 
 
 // Steigung der Spindel
-const int steigung = 8
+const int steigung = 8;
 
 // Schritte pro Umdrehung
-const int schritte = 200
+const int schritte = 200;
 
 //HX711 constructor:
 HX711_ADC LoadCell(HX711_dout, HX711_sck);
@@ -156,7 +156,7 @@ void kraft_weg() {
 
 void anfangszugkraft(int prueflaenge) {
   int speed_t = 12;
-  int x = round(prueflaenge * schritte / steigung)
+  int x = round(prueflaenge * schritte / steigung);
 
   digitalWrite(dirPin, HIGH);
   if (digitalRead(stopUnten) == 0) {
@@ -167,10 +167,10 @@ void anfangszugkraft(int prueflaenge) {
   Serial.println("Beginn der Messung Anfangszugkraft");
   Serial.print("Prüflänge: ");
   Serial.println(prueflaenge);
-  Serila.println("Schlitten wird auf Prüflänge bewegt");
+  Serial.println("Schlitten wird auf Prüflänge bewegt");
   move(x, 1, speed_t);
   delay(1000);
-  Serial.println("Elastic wird auf vierfache Prüflänge gedehnt")
+  Serial.println("Elastic wird auf vierfache Prüflänge gedehnt");
   move(4*x, 1, speed_t);
   Serial.println("Warte 5 sek");
   delay(5000);
@@ -185,6 +185,4 @@ void anfangszugkraft(int prueflaenge) {
   Serial.print("Anfangszugkraft: ");
   Serial.println(i);
   
-  
-}
 }
