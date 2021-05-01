@@ -24,14 +24,19 @@ def write_read(x):
 
 def btn_toStart_click():
     try:
-        print("Hallo")
-        #arduino.write(bytes(0, 'utf-8'))
+        arduino.write(bytes(0, 'utf-8'))
     except:
         pass
 
-def btn_messung_click():
+def btn_messung_ZV_click():
     try:
         arduino.write(bytes(3, 'utf-8'))
+    except:
+        pass
+    
+def btn_messung_AZ_click():
+    try:
+        arduino.write(bytes(4, 'utf-8'))
     except:
         pass
 
@@ -49,10 +54,12 @@ def main():
     mywin.wm_title('Zugprüfung')
     myfont = tkf.Font(family='DejaVuSans', size=20)
     btn_toStart = Button(mywin, text="Fahrt zur Nullposition", command=btn_toStart_click)
-    btn_messung = Button(mywin, text="Start Messung", command=btn_messung_click)
+    btn_messung_ZV = Button(mywin, text="Start Messung Z-L-Diagramm", command=btn_messung_ZV_click)
+    btn_messung_AZ = Button(mywin, text="Start Messung Anfangszugkraft", command=btn_messung_AZ_click)
     
     btn_toStart.pack()
-    btn_messung.pack()
+    btn_messung_ZV.pack()
+    btn_messung_AZ.pack()
 
     signal.signal(signal.SIGINT, strg_c)
     mywin.after(200, do_nothing)
