@@ -130,8 +130,7 @@ void kraft_weg(int schritte, int richtung) {
   //}
 
   while (i < schritte) {
-    //move(1, richtung, speed_t);
-    delay(1000);
+    move(1, richtung, speed_t);
 
     if (LoadCell.update()) newDataReady = true;
 
@@ -139,7 +138,10 @@ void kraft_weg(int schritte, int richtung) {
       if (millis() > t + serialPrintInterval) {
         float kraft = LoadCell.getData();
         Serial.print("Load_cell output val: ");
-        Serial.println(kraft);
+        Serial.print(kraft);
+        Serial.print(" N / ");
+        Serial.print(kraft*3.5969);
+        Serial.println(" oz");
 
         if (kraft > force_max) {
           Serial.println("Maximal zulässige Zugkraft erreicht");
@@ -156,20 +158,31 @@ void kraft_weg(int schritte, int richtung) {
 
 void anfangszugkraft(float prueflaenge) {
   int speed_t = 12;
-  int x = round(prueflaenge * schritte / steigung);
+  
 
   const int serialPrintInterval = 0;
   static boolean newDataReady = 0;
-
+    
+  Serial.println("Messung Anfangszugkraft");
+  
   digitalWrite(dirPin, HIGH);
   if (digitalRead(stopUnten) == 0) {
     Serial.println("Schlitten befindet sich nicht in Nullposition!");
     return;
   }
+  Serial.println("Eingabe Innendurchmesser und mit Enter bestätigen");
+  boolean _resume = false;
+  while (_resume == false) {
+    prueflaenge = Serial.parseFloat();
+    if (prueflaenge != 0) {
+      Serial.print("Prüflänge: ");
+      Serial.println(prueflaenge);
+      _resume = true;
+    }
+  }
+  
+  int x = round(prueflaenge * schritte / steigung);
 
-  Serial.println("Beginn der Messung Anfangszugkraft");
-  Serial.print("Prüflänge: ");
-  Serial.println(prueflaenge);
   Serial.println("Schlitten wird auf Prüflänge bewegt");
   //move(x, 1, speed_t);
   kraft_weg(x, 1);
@@ -196,7 +209,11 @@ void anfangszugkraft(float prueflaenge) {
   float kraft = LoadCell.getData();
   delay(1000);
   Serial.print("Anfangszugkraft: ");
-  Serial.println(kraft);
+  Serial.print(kraft);
+  Serial.println(" N");
+  Serial.print("Anfangszugkraft: ");
+  Serial.print(kraft*3.5969);
+  Serial.println(" oz");
   
 //  if (LoadCell.update()) newDataReady = true;
 //  
